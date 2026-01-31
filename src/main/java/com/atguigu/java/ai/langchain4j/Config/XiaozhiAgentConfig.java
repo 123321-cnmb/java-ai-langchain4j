@@ -1,3 +1,7 @@
+/*
+ * 小智AI助手配置类
+ * 该配置类提供了聊天记忆提供者和内容检索器的配置
+ */
 package com.atguigu.java.ai.langchain4j.Config;
 
 import com.atguigu.java.ai.langchain4j.store.MongoChatMemoryStore;
@@ -19,6 +23,10 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 小智AI助手配置类
+ * 配置聊天记忆提供者和内容检索器，用于支持AI助手的记忆功能和知识库检索功能
+ */
 @Configuration
 public class XiaozhiAgentConfig {
     @Autowired
@@ -29,6 +37,12 @@ public class XiaozhiAgentConfig {
     @Autowired
     private EmbeddingModel embeddingModel;
 
+    /**
+     * 创建聊天记忆提供者
+     * 为小智AI助手提供基于MongoDB的聊天记忆功能，支持最多保存20条消息
+     *
+     * @return 返回聊天记忆提供者实例
+     */
     @Bean
     ChatMemoryProvider chatMemoryProviderXiaozhi() {
         return memoryId -> MessageWindowChatMemory.builder()
@@ -38,37 +52,38 @@ public class XiaozhiAgentConfig {
                 .build();
     }
 
-//    @Bean
-//    ContentRetriever contentRetrieverXiaozhi() {
-////使用FileSystemDocumentLoader读取指定目录下的知识库文档
-////并使用默认的文档解析器对文档进行解析
-//        Document document1 = FileSystemDocumentLoader.loadDocument("D:/knowledge/医院信息.md");
-//        Document document2 = FileSystemDocumentLoader.loadDocument("D:/knowledge/科室信息.md");
-//        Document document3 = FileSystemDocumentLoader.loadDocument("D:/knowledge/神经内科.md");
-//        List<Document> documents = Arrays.asList(document1, document2, document3);
-////使用内存向量存储
-//        InMemoryEmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
-////使用默认的文档分割器
-//        EmbeddingStoreIngestor.ingest(documents, embeddingStore);
-////从嵌入存储（EmbeddingStore）里检索和查询内容相关的信息
-//        return EmbeddingStoreContentRetriever.from(embeddingStore);
-//    }
-
+    /**
+     * 创建内容检索器（基于本地知识库）
+     * 从本地文件系统加载知识库文档并创建内容检索器（使用内存向量存储）
+     * 注：此方法已被注释，在生产环境中使用contentRetrieverXiaozhiPincone
+     *
+     * @return 返回内容检索器实例
+     */
     @Bean
-    ContentRetriever contentRetrieverXiaozhiPincone() {
-// 创建一个 EmbeddingStoreContentRetriever 对象，用于从嵌入存储中检索内容
-        return EmbeddingStoreContentRetriever
-                .builder()
-// 设置用于生成嵌入向量的嵌入模型
-                .embeddingModel(embeddingModel)
-// 指定要使用的嵌入存储
-                .embeddingStore(embeddingStore)
-// 设置最大检索结果数量，这里表示最多返回 1 条匹配结果
-                .maxResults(1)
-// 设置最小得分阈值，只有得分大于等于 0.8 的结果才会被返回
-                .minScore(0.8)
-// 构建最终的 EmbeddingStoreContentRetriever 实例
-                .build();
+    ContentRetriever contentRetrieverXiaozhi() {
+        Document document1 = FileSystemDocumentLoader.loadDocument("D:/knowledge/医院信息.md");
+        Document document2 = FileSystemDocumentLoader.loadDocument("D:/knowledge/科室信息.md");
+        Document document3 = FileSystemDocumentLoader.loadDocument("D:/knowledge/神经内科.md");
+        List<Document> documents = Arrays.asList(document1, document2, document3);
+        InMemoryEmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+        EmbeddingStoreIngestor.ingest(documents, embeddingStore);
+        return EmbeddingStoreContentRetriever.from(embeddingStore);
     }
 
+    /**
+     * 创建内容检索器（基于Pinecone向量数据库）
+     * 使用Pinecone向量数据库创建内容检索器，支持精确匹配和相似度检索
+     *
+     * @return 返回基于Pinecone的内容检索器实例
+     */
+    @Bean
+    ContentRetriever contentRetrieverXiaozhiPincone() {
+        return EmbeddingStoreContentRetriever
+                .builder()
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .maxResults(1)  // 最大返回结果数
+                .minScore(0.8)  // 最小相似度分数
+                .build();
+    }
 }
