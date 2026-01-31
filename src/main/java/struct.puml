@@ -1,0 +1,66 @@
+@startuml
+title 硅谷小智 AI 助手 - 系统架构图
+
+' 定义颜色和样式
+skinparam componentStyle rectangle
+skinparam NoteBackgroundColor #FEFECE
+
+package "前端/外部调用" {
+    [User/Client] as user
+}
+
+package "Spring Boot 应用层" {
+    component "XiaozhiController" as controller <<RestController>>
+    component "XiaozhiAgent" as agent <<AiService Interface>>
+
+    package "LangChain4j 核心编排" {
+        component "QwenStreamingChatModel" as llm <<LLM>>
+        component "MessageWindowChatMemory" as memory <<Memory>>
+        component "ContentRetriever (Pinecone)" as rag <<RAG>>
+        component "AppointmentTools" as tools <<Tools>>
+    }
+}
+
+package "持久化与基础设施" {
+    database "MongoDB" as mongo {
+        [chat_messages 集合]
+    }
+
+    database "Pinecone" as vectorDB {
+        [医疗知识向量库]
+    }
+
+    database "MySQL" as mysql {
+        [appointment 预约表]
+    }
+
+    component "MongoChatMemoryStore" as mongoStore
+    component "AppointmentService" as apptService
+}
+
+' 交互关系
+user --> controller : 1. POST /xiaozhi/chat (ChatForm)
+controller --> agent : 2. 调用 chat(memoryId, message)
+agent ..> llm : 3. 提交增强上下文 (Prompt)
+agent <--> memory : 4. 存取历史对话
+memory <--> mongoStore : 5. 持久化记录
+mongoStore <--> mongo : 6. JSON 序列化存储
+
+agent <--> rag : 7. 检索相关知识
+rag <--> vectorDB : 8. 向量相似度查询 (score > 0.8)
+
+agent <--> tools : 9. 执行业务指令
+tools <--> apptService : 10. 调用业务逻辑
+apptService <--> mysql : 11. 数据库 CRUD
+
+agent --> user : 12. Flux<String> 流式响应
+
+note right of agent
+  @AiService 配置:
+  - streamingChatModel: qwen
+  - chatMemoryProvider: 20条窗口
+  - contentRetriever: Pinecone
+  - tools: appointmentTools
+end note
+
+@endum
