@@ -2,11 +2,8 @@
 这个项目是一个**基于大语言模型的智能医院客服系统**。它不仅仅是一个简单的聊天机器人，而是一个能够查询医疗知识、记住用户对话、甚至能通过调用后台接口执行“预约挂号”任务的**智能 Agent（代理）**。
 
 ### 项目技术栈
-| **核心框架** | Spring Boot + LangChain4j |
-| **大模型** | 通义千问 (Qwen) 流式模型 |
-| **持久化记忆** | MongoDB (`MongoTemplate`) |
-| **向量数据库** | Pinecone (分布式向量存储) |
-| **业务数据库** | MySQL + MyBatis-Plus |
+
+ Spring Boot + LangChain4j+通义千问 (Qwen) 流式模型 + MongoDB +Pinecone (分布式向量存储) + MySQL + MyBatis-Plus
 
 ## 第一阶段：核心对话
 项目的入口是 `XiaozhiController.java`
