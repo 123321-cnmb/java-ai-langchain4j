@@ -1,66 +1,122 @@
 @startuml
-title 硅谷小智 AI 助手 - 系统架构图
+title 系统架构图
 
-' 定义颜色和样式
-skinparam componentStyle rectangle
-skinparam NoteBackgroundColor #FEFECE
+left to right direction
 
-package "前端/外部调用" {
-    [User/Client] as user
+package "用户界面/客户端" {
+  [Web Client] as client
+  [Mobile App] as mobile
 }
 
-package "Spring Boot 应用层" {
-    component "XiaozhiController" as controller <<RestController>>
-    component "XiaozhiAgent" as agent <<AiService Interface>>
+node "Spring Boot AI应用服务器" {
+  package "Controller层" {
+    [XiaozhiController] as controller
+  }
 
-    package "LangChain4j 核心编排" {
-        component "QwenStreamingChatModel" as llm <<LLM>>
-        component "MessageWindowChatMemory" as memory <<Memory>>
-        component "ContentRetriever (Pinecone)" as rag <<RAG>>
-        component "AppointmentTools" as tools <<Tools>>
-    }
+  package "AI Agent层" {
+    [XiaozhiAgent] as agent
+  }
+
+  package "配置层" {
+    [XiaozhiAgentConfig] as config
+    [WebSocketConfig] as wsconfig
+  }
+
+  package "工具层" {
+    [AppointmentTools] as tools
+  }
+
+  package "服务层" {
+    [AppointmentService] as apptService
+    [VoiceService] as voiceService
+  }
+
+  package "数据访问层" {
+    [AppointmentMapper] as mapper
+  }
+
+  package "存储层" {
+    [MongoChatMemoryStore] as mongoStore
+  }
+
+  package "实体层" {
+    [Appointment] as appointment
+    [ChatForm] as chatForm
+    [ChatMessages] as chatMsgs
+  }
+
+  package "处理器层" {
+    [CallHandler] as callHandler
+    [VoiceHandler] as voiceHandler
+  }
+
+  package "工具类" {
+    [AliyunTokenUtil] as tokenUtil
+  }
 }
 
-package "持久化与基础设施" {
-    database "MongoDB" as mongo {
-        [chat_messages 集合]
-    }
-
-    database "Pinecone" as vectorDB {
-        [医疗知识向量库]
-    }
-
-    database "MySQL" as mysql {
-        [appointment 预约表]
-    }
-
-    component "MongoChatMemoryStore" as mongoStore
-    component "AppointmentService" as apptService
+database "MySQL数据库" {
+  folder "guiguxiaozhi模式" {
+    [appointment表] as apptTable
+  }
 }
 
-' 交互关系
-user --> controller : 1. POST /xiaozhi/chat (ChatForm)
-controller --> agent : 2. 调用 chat(memoryId, message)
-agent ..> llm : 3. 提交增强上下文 (Prompt)
-agent <--> memory : 4. 存取历史对话
-memory <--> mongoStore : 5. 持久化记录
-mongoStore <--> mongo : 6. JSON 序列化存储
+database "MongoDB数据库" {
+  folder "chat_memory_db数据库" {
+    [chat_messages集合] as chatCollection
+  }
+}
 
-agent <--> rag : 7. 检索相关知识
-rag <--> vectorDB : 8. 向量相似度查询 (score > 0.8)
+cloud "向量数据库" as cloud_pinecone {
+  [Pinecone向量数据库] as pinecone
+}
 
-agent <--> tools : 9. 执行业务指令
-tools <--> apptService : 10. 调用业务逻辑
-apptService <--> mysql : 11. 数据库 CRUD
+cloud "AI模型服务" as cloud_ai {
+  [阿里云通义千问API] as qwen
+  [DeepSeek推理模型API] as deepseek
+}
 
-agent --> user : 12. Flux<String> 流式响应
+cloud "外部语音服务" as cloud_voice {
+  [阿里云TTS/ASR服务] as tts
+}
 
-note right of agent
-  @AiService 配置:
+' 关系定义
+client .. mobile : "多端接入"
+client --> controller : "HTTP请求\n/chat, /history等"
+mobile --> controller : "HTTP请求\n/chat, /history等"
+
+controller --> agent : "调用AI助手\nchat(memoryId, message)"
+controller --> mongoStore : "获取历史记录\ngetMessages()"
+controller --> voiceService : "语音转换\ntextToSpeech()"
+controller --> callHandler : "WebSocket通话\nstart-call"
+
+agent --> config : "配置注入\n(LLM, Memory, Tools, RAG)"
+agent --> qwen : "流式聊天模型\nqwenStreamingChatModel"
+agent --> deepseek : "推理模型\ndeepseek-reasoner"
+agent --> tools : "调用工具\n预约挂号、取消等"
+agent --> pinecone : "知识库检索\n向量相似度查询"
+
+tools --> apptService : "业务逻辑处理\nbook/cancel/query"
+apptService --> mapper : "数据访问\nMyBatis-Plus"
+mapper --> apptTable : "数据库操作\nCRUD操作"
+
+mongoStore --> chatCollection : "聊天记录存储\nJSON序列化"
+
+voiceService --> tts : "语音合成与识别\nTTS/ASR API"
+callHandler --> tts : "通话处理\n实时语音"
+
+note left of agent
+  @AiService注解配置
   - streamingChatModel: qwen
   - chatMemoryProvider: 20条窗口
-  - contentRetriever: Pinecone
   - tools: appointmentTools
+  - contentRetriever: pinecone
 end note
 
-@endum
+note right of pinecone
+  存储医院知识库
+  支持RAG检索
+  最小相似度0.8
+end note
+
+@enduml
