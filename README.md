@@ -1,4 +1,5 @@
-![Uploading image.png…]()
+<img width="2183" height="1452" alt="image" src="https://github.com/user-attachments/assets/43e10821-a314-4898-a01e-ead5f70b662d" />
+
 这个项目是一个**基于大语言模型的智能医院客服系统**。它不仅仅是一个简单的聊天机器人，而是一个能够查询医疗知识、记住用户对话、甚至能通过调用后台接口执行“预约挂号”任务的**智能 Agent（代理）**。
 
 ### 项目技术栈
