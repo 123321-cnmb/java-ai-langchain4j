@@ -1,4 +1,4 @@
-package com.atguigu.java.ai.langchain4j.service;
+package com.atguigu.java.ai.langchain4j.service.impl;
 
 import com.alibaba.nls.client.protocol.NlsClient;
 import com.alibaba.nls.client.protocol.OutputFormatEnum;
@@ -7,6 +7,7 @@ import com.alibaba.nls.client.protocol.tts.SpeechSynthesizer;
 import com.alibaba.nls.client.protocol.tts.SpeechSynthesizerListener;
 import com.alibaba.nls.client.protocol.tts.SpeechSynthesizerResponse;
 import com.atguigu.java.ai.langchain4j.exception.VoiceServiceException;
+import com.atguigu.java.ai.langchain4j.service.VoiceService;
 import com.atguigu.java.ai.langchain4j.utils.AliyunTokenUtil;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;

@@ -1,12 +1,13 @@
-/*
+package com.atguigu.java.ai.langchain4j.service.impl;/*
  * 预约服务实现类
  * 实现预约相关的业务逻辑操作
  */
-package com.atguigu.java.ai.langchain4j.service;
+
 
 import com.atguigu.java.ai.langchain4j.entity.Appointment;
 import com.atguigu.java.ai.langchain4j.exception.DatabaseException;
 import com.atguigu.java.ai.langchain4j.mapper.AppointmentMapper;
+import com.atguigu.java.ai.langchain4j.service.AppointmentService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppointmentServiceImpl extends ServiceImpl<AppointmentMapper, Appointment>
         implements AppointmentService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AppointmentServiceImpl.class);
 
     /**
@@ -38,14 +39,14 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentMapper, Appoi
                 logger.warn("查询参数为空");
                 return null;
             }
-            
+
             LambdaQueryWrapper<Appointment> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Appointment::getUsername, appointment.getUsername());
             queryWrapper.eq(Appointment::getIdCard, appointment.getIdCard());
             queryWrapper.eq(Appointment::getDepartment, appointment.getDepartment());
             queryWrapper.eq(Appointment::getDate, appointment.getDate());
             queryWrapper.eq(Appointment::getTime, appointment.getTime());
-            
+
             Appointment appointmentDB = baseMapper.selectOne(queryWrapper);
             logger.debug("查询预约记录完成，结果: {}", appointmentDB != null);
             return appointmentDB;

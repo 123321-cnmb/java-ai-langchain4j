@@ -6,8 +6,8 @@ package com.atguigu.java.ai.langchain4j.controller;
 
 import com.atguigu.java.ai.langchain4j.assistant.XiaozhiAgent;
 import com.atguigu.java.ai.langchain4j.bean.ChatForm;
-import com.atguigu.java.ai.langchain4j.service.AppointmentServiceImpl;
 import com.atguigu.java.ai.langchain4j.service.VoiceService;
+import com.atguigu.java.ai.langchain4j.service.impl.AppointmentServiceImpl;
 import com.atguigu.java.ai.langchain4j.store.MongoChatMemoryStore;
 import com.atguigu.java.ai.langchain4j.utils.AliyunTokenUtil;
 import dev.langchain4j.data.message.AiMessage;
@@ -65,17 +65,17 @@ public class XiaozhiController {
         try {
             Long memoryId = chatForm.getMemoryId();
             String message = chatForm.getMessage();
-            
+
             if (memoryId == null) {
                 logger.warn("会话ID为空，使用默认ID");
                 memoryId = System.currentTimeMillis();
             }
-            
+
             if (message == null || message.trim().isEmpty()) {
                 logger.warn("用户消息为空，返回空响应");
                 return Flux.empty();
             }
-            
+
             return xiaozhiAgent.chat(memoryId, message);
         } catch (Exception e) {
             logger.error("处理聊天请求时发生异常", e);
@@ -121,7 +121,7 @@ public class XiaozhiController {
                     result.add(map);
                 }
             }
-            
+
             logger.debug("成功获取记忆ID为 {} 的历史记录，共 {} 条", id, result.size());
         } catch (Exception e) {
             logger.error("获取历史记录时发生异常，记忆ID: {}", chatForm.getMemoryId(), e);
@@ -189,13 +189,13 @@ public class XiaozhiController {
                 logger.warn("TTS请求参数无效");
                 return ResponseEntity.badRequest().build();
             }
-            
+
             String text = request.get("text");
             if (text.length() > 1000) { // 限制文本长度，防止过长文本导致的问题
                 logger.warn("TTS请求文本过长: {} 字符", text.length());
                 text = text.substring(0, 1000);
             }
-            
+
             byte[] audioData = voiceService.textToSpeech(text);
 
             // 关键：如果后端拦截了异常并返回了空数组，在这里拦截它

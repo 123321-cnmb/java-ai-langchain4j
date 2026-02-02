@@ -28,12 +28,12 @@ import java.util.List;
  */
 @Component
 public class MongoChatMemoryStore implements ChatMemoryStore {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(MongoChatMemoryStore.class);
-    
+
     @Autowired
     private MongoTemplate mongoTemplate;
-    
+
     /**
      * 获取指定记忆ID的聊天消息列表
      * 从MongoDB中查询并反序列化聊天消息
@@ -48,16 +48,16 @@ public class MongoChatMemoryStore implements ChatMemoryStore {
                 logger.warn("记忆ID为空，返回空消息列表");
                 return new LinkedList<>();
             }
-            
+
             Criteria criteria = Criteria.where("memoryId").is(memoryId);
             Query query = new Query(criteria);
             ChatMessages chatMessages = mongoTemplate.findOne(query, ChatMessages.class);
-            
+
             if (chatMessages == null) {
                 logger.debug("未找到记忆ID为 {} 的聊天记录", memoryId);
                 return new LinkedList<>();
             }
-            
+
             List<ChatMessage> messages = ChatMessageDeserializer.messagesFromJson(chatMessages.getContent());
             logger.debug("成功获取记忆ID为 {} 的聊天记录，共 {} 条", memoryId, messages != null ? messages.size() : 0);
             return messages != null ? messages : new LinkedList<>();
@@ -66,7 +66,7 @@ public class MongoChatMemoryStore implements ChatMemoryStore {
             return new LinkedList<>();
         }
     }
-    
+
     /**
      * 更新指定记忆ID的聊天消息列表
      * 将聊天消息序列化后存储到MongoDB中，如果不存在则新增
@@ -81,22 +81,22 @@ public class MongoChatMemoryStore implements ChatMemoryStore {
                 logger.warn("记忆ID为空，跳过更新操作");
                 return;
             }
-            
+
             if (messages == null) {
                 logger.warn("消息列表为空，清空记忆ID为 {} 的聊天记录", memoryId);
                 deleteMessages(memoryId);
                 return;
             }
-            
+
             String serializedMessages = ChatMessageSerializer.messagesToJson(messages);
             Criteria criteria = Criteria.where("memoryId").is(memoryId);
             Query query = new Query(criteria);
             Update update = new Update();
             update.set("content", serializedMessages);
-            
+
             // 根据query条件能查询出文档，则修改文档；否则新增文档
             mongoTemplate.upsert(query, update, ChatMessages.class);
-            
+
             logger.debug("成功更新记忆ID为 {} 的聊天记录，共 {} 条", memoryId, messages.size());
         } catch (DataAccessException e) {
             logger.error("更新聊天记录时发生数据库访问异常，记忆ID: {}", memoryId, e);
@@ -106,7 +106,7 @@ public class MongoChatMemoryStore implements ChatMemoryStore {
             throw e;
         }
     }
-    
+
     /**
      * 删除指定记忆ID的聊天消息
      * 从MongoDB中删除对应记忆ID的聊天记录
@@ -120,12 +120,12 @@ public class MongoChatMemoryStore implements ChatMemoryStore {
                 logger.warn("记忆ID为空，跳过删除操作");
                 return;
             }
-            
+
             Criteria criteria = Criteria.where("memoryId").is(memoryId);
             Query query = new Query(criteria);
-            
+
             long deletedCount = mongoTemplate.remove(query, ChatMessages.class).getDeletedCount();
-            
+
             logger.debug("删除记忆ID为 {} 的聊天记录，删除数量: {}", memoryId, deletedCount);
         } catch (DataAccessException e) {
             logger.error("删除聊天记录时发生数据库访问异常，记忆ID: {}", memoryId, e);
