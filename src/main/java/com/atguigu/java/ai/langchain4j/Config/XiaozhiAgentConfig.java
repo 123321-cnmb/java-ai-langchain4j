@@ -19,7 +19,6 @@ import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +33,7 @@ public class XiaozhiAgentConfig {
 
     @Autowired
     private EmbeddingStore embeddingStore;
+
     @Autowired
     private EmbeddingModel embeddingModel;
 
@@ -53,9 +53,9 @@ public class XiaozhiAgentConfig {
     }
 
     /**
-     * 创建内容检索器（基于本地知识库）
+     * 创建内容检索器，基于本地知识库
      * 从本地文件系统加载知识库文档并创建内容检索器（使用内存向量存储）
-     * 注：此方法已被注释，在生产环境中使用contentRetrieverXiaozhiPincone
+     * 注：在生产环境中使用contentRetrieverXiaozhiPincone
      *
      * @return 返回内容检索器实例
      */
@@ -71,7 +71,7 @@ public class XiaozhiAgentConfig {
     }
 
     /**
-     * 创建内容检索器（基于Pinecone向量数据库）
+     * 创建内容检索器，基于Pinecone向量数据库
      * 使用Pinecone向量数据库创建内容检索器，支持精确匹配和相似度检索
      *
      * @return 返回基于Pinecone的内容检索器实例

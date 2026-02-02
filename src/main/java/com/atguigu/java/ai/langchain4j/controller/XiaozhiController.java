@@ -22,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +43,6 @@ public class XiaozhiController {
 
     @Autowired
     private MongoChatMemoryStore mongoChatMemoryStore;
-
-    @Autowired
-    private AliyunTokenUtil aliyunTokenUtil;
 
     @Autowired
     private VoiceService voiceService;
@@ -105,10 +101,13 @@ public class XiaozhiController {
         return result;
     }
 
-    // 在 XiaozhiController.java 中添加
 
     /**
      * 删除指定会话的历史记录
+     * 根据传入的会话ID删除MongoDB中对应的聊天历史记录
+     *
+     * @param chatForm 包含会话ID的聊天表单
+     * @return 包含操作结果的响应Map，包括成功状态和错误信息（如有）
      */
     @PostMapping("/delete-history")
     public Map<String, Object> deleteHistory(@RequestBody ChatForm chatForm) {
@@ -127,6 +126,15 @@ public class XiaozhiController {
         return response;
     }
 
+    /**
+     * 启动语音通话接口
+     * 处理客户端发起的语音通话请求，返回WebSocket连接地址等必要信息
+     *
+     * @param form 通话表单数据，包含通话相关参数
+     * @return 包含WebSocket连接地址和操作结果状态的Map对象
+     *         - wsUrl: WebSocket连接地址
+     *         - success: 操作是否成功
+     */
     @PostMapping("/start-call")
     public Map<String, Object> startCall(@RequestBody ChatForm form) {
         Map<String, Object> res = new HashMap<>();
@@ -137,6 +145,14 @@ public class XiaozhiController {
     }
 
 
+    /**
+     * 文本转语音接口
+     * 将输入的文本转换为音频数据流并返回
+     *
+     * @param request 请求参数Map，包含待转换的文本内容
+     * @return ResponseEntity包装的音频字节数组，包含音频流和相关HTTP头信息
+     *         成功时返回音频数据，失败时返回500状态码
+     */
     @PostMapping(value = "/tts", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> textToSpeech(@RequestBody Map<String, String> request) {
         try {
@@ -155,6 +171,7 @@ public class XiaozhiController {
             return ResponseEntity.status(500).build();
         }
     }
+
 
 
 

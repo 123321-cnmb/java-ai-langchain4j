@@ -47,7 +47,7 @@ public class AppointmentTools {
      * @param appointment 预约信息对象，用于查询要取消的预约记录
      * @return 取消预约结果字符串，可能的返回值包括："取消预约成功"或"您没有预约记录，请核对预约科室和时间"
      */
-    @Tool(name = "取消预约挂号", value = "根据参数，查询预约是否存在，如果存在则删除预约记录并返回取 消预约成功，否则返回取消预约失败")
+    @Tool(name = "取消预约挂号", value = "根据参数，查询预约是否存在，如果存在则删除预约记录并返回取消预约成功，否则返回取消预约失败")
     public String cancelAppointment(Appointment appointment) {
         // 查询数据库中是否存在对应的预约记录
         Appointment appointmentDB = appointmentService.getOne(appointment);

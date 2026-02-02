@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
-
+/**
+ * WebSocket 配置类，用于配置和注册 WebSocket 处理器。
+ * 此类实现了 WebSocketConfigurer 接口，并使用 @EnableWebSocket 注解启用 WebSocket 支持。
+ */
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
@@ -19,7 +22,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Autowired
     private AliyunTokenUtil aliyunTokenUtil;
 
-    // 1. 添加注入 XiaozhiAgent
     @Autowired
     private XiaozhiAgent xiaozhiAgent;
 
