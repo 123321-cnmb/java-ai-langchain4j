@@ -5,6 +5,7 @@
 package com.atguigu.java.ai.langchain4j.service;
 
 import com.atguigu.java.ai.langchain4j.entity.Appointment;
+import com.atguigu.java.ai.langchain4j.exception.DatabaseException;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -18,6 +19,7 @@ public interface AppointmentService extends IService<Appointment> {
      *
      * @param appointment 包含查询条件的预约对象
      * @return 返回匹配的预约记录，如果没有找到则返回null
+     * @throws DatabaseException 数据库操作异常
      */
-    Appointment getOne(Appointment appointment);
+    Appointment getOne(Appointment appointment) throws DatabaseException;
 }
